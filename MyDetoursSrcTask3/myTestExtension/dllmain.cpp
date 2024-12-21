@@ -1,13 +1,27 @@
 // dllmain.cpp : Defines the entry point for the DLL application.
 #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
 #include <windows.h>
-#include "../inc/detours.h"
+#include "..\inc\detours.h"
+#include "..\inc\test.h"
 #include <stdio.h>
 #include <type_traits>
 
 #define DETOURS_PFN(func) auto *g_##func = &func
 #define DETOURS_FN_CHECK(func) static_assert(std::is_same_v<decltype(&My##func), decltype(&func)>, "DETOURS_FN_CHECK: " #func " mistype")
 #define DETOURS_XXTACH(func) reinterpret_cast<PVOID*>(&g_##func), reinterpret_cast<PVOID>(My##func)
+
+static DETOURS_PFN(TestApi);
+extern "C" void MyTestApi(LPCWSTR str)
+{
+    WCHAR szMsgFix[MAX_PATH];
+
+    MessageBox(nullptr, L"Pls, check for Fixed: TestApi => myTestApi", L"myTestExtesnion: myTestApi", MB_OK);
+    swprintf_s(szMsgFix, L"It is definitely fixed: '%ls'", str);
+
+    return g_TestApi(szMsgFix);
+}
+DETOURS_FN_CHECK(TestApi);
+
 
 static DETOURS_PFN(CreateMutexW);
 HANDLE MyCreateMutexW(LPSECURITY_ATTRIBUTES lpMutexAttributes, BOOL bInitialOwner, LPCWSTR lpName)
@@ -23,10 +37,10 @@ HANDLE MyCreateMutexW(LPSECURITY_ATTRIBUTES lpMutexAttributes, BOOL bInitialOwne
 }
 DETOURS_FN_CHECK(CreateMutexW);
 
-BOOL APIENTRY DllMain( HMODULE hModule,
-                       DWORD  ul_reason_for_call,
-                       LPVOID lpReserved
-                     )
+BOOL APIENTRY DllMain(HMODULE hModule,
+    DWORD  ul_reason_for_call,
+    LPVOID lpReserved
+)
 {
     if (DetourIsHelperProcess()) {
         return TRUE;
@@ -40,12 +54,14 @@ BOOL APIENTRY DllMain( HMODULE hModule,
         DetourTransactionBegin();
         DetourUpdateThread(GetCurrentThread());
         DetourAttach(DETOURS_XXTACH(CreateMutexW));
+        DetourAttach(DETOURS_XXTACH(TestApi));
         DetourTransactionCommit();
         break;
     case DLL_PROCESS_DETACH:
         DetourTransactionBegin();
         DetourUpdateThread(GetCurrentThread());
         DetourDetach(DETOURS_XXTACH(CreateMutexW));
+        DetourDetach(DETOURS_XXTACH(TestApi));
         DetourTransactionCommit();
         break;
     case DLL_THREAD_ATTACH:

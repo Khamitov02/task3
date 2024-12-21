@@ -7,7 +7,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "..\inc\detours.h"
-//#include "..\inc\test.h"
+#include "..\inc\test.h"
+
 
 int main()
 {

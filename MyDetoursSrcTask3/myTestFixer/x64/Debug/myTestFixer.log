@@ -1,0 +1,7 @@
+﻿  Microsoft (R) Library Manager Version 14.41.34123.0
+  Copyright (C) Microsoft Corporation.  All rights reserved.
+  
+     Creating library C:\Task3\MyDetoursSrcTask3\x64\Debug\TestDll.lib and object C:\Task3\MyDetoursSrcTask3\x64\Debug\TestDll.exp
+  myTestFixer.cpp
+     Creating library C:\Task3\MyDetoursSrcTask3\x64\Debug\myTestFixer.lib and object C:\Task3\MyDetoursSrcTask3\x64\Debug\myTestFixer.exp
+  myTestFixer.vcxproj -> C:\Task3\MyDetoursSrcTask3\x64\Debug\myTestFixer.exe
